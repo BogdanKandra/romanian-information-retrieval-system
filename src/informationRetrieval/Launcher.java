@@ -23,9 +23,9 @@ import static informationRetrieval.LuceneUtils.*; // Static import allows for st
  */
 public class Launcher {
 
-	private String indexDir = "F:\\Programare\\Java\\Eclipse\\LuceneProject\\index";
-	private String dataDir  = "F:\\Programare\\Java\\Eclipse\\LuceneProject\\data";
-	private static String queryPath= "F:\\Programare\\Java\\Eclipse\\LuceneProject\\queries.txt";
+	private String indexDir = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\index";
+	private String dataDir  = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\data";
+	private static String queryPath= "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queries.txt";
 	private Indexer indexer;
 	private Searcher searcher;
 	

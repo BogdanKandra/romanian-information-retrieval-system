@@ -24,7 +24,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
  */
 public final class LuceneUtils{
 	
-	private static final File stopwordFile = new File("F:\\Programare\\Java\\Eclipse\\LuceneProject\\stopwords-ro.txt");
+	private static final File stopwordFile = new File("F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\stopwords-ro.txt");
 	public static final String CONTENTS = "contents";
 	public static final String FILE_NAME = "filename";
 	public static final String FILE_PATH = "filepath";
