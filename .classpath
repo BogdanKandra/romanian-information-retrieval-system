@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="F:/Programare/Java/libs/lucene-6.5.1/core/lucene-core-6.5.1.jar" sourcepath="F:/Programare/Java/libs/lucene-6.5.1/core/lucene-core-6.5.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/F:/Programare/Java/libs/lucene-6.5.1/core/lucene-core-6.5.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="F:/Programare/Java/libs/lucene-6.5.1/queryparser/lucene-queryparser-6.5.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/F:/Programare/Java/libs/lucene-6.5.1/queryparser/lucene-queryparser-6.4.2-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="F:/Programare/Java/libs/commons-io-2.5/commons-io-2.5.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/F:/Programare/Java/libs/commons-io-2.5/commons-io-2.5-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="F:/Programare/Java/libs/tika-1.14/tika-core-1.14.jar" sourcepath="F:/Programare/Java/libs/tika-1.14/tika-core-1.14-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/F:/Programare/Java/libs/tika-1.14/tika-core-1.14-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="F:/Programare/Java/libs/tika-1.14/tika-app-1.14.jar"/>
+	<classpathentry kind="lib" path="F:/Programare/Java/libs/lucene-6.5.1/analysis/common/lucene-analyzers-common-6.5.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
