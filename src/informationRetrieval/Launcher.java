@@ -3,6 +3,12 @@ package informationRetrieval;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Scanner;
 
 import org.apache.lucene.document.Document;
@@ -115,7 +121,7 @@ public class Launcher {
 		
 		try{
 			launcher = new Launcher();
-//			launcher.index();
+			launcher.index();
 			File queryFile = new File(queryPath);
 			FileInputStream fis = new FileInputStream(queryFile);
 			Scanner in = new Scanner(fis);
@@ -125,5 +131,26 @@ public class Launcher {
 		} catch(IOException e){
 			e.printStackTrace();
 		}
+		
+/*		File[] files = new File("F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\data").listFiles();
+		
+		for(File f : files){
+			Date lastModified = new Date(f.lastModified());
+			SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+			String formattedDate = formatter.format(lastModified);
+			
+			System.out.println(formattedDate);*/
+			
+/*			DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", Locale.UK);
+			LocalDateTime d = LocalDateTime.parse(formattedDate, df);*/
+/*			Date d;
+			try {
+				d = formatter.parse(formattedDate);
+				System.out.println(d.toString());
+			} catch (java.text.ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
+//		}
 	}
 }
