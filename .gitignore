@@ -1,6 +1,8 @@
 .settings
 bin
-bin/informationRetrieval
+bin/informationRetrieval/Indexer.class
+bin/informationRetrieval/Launcher.class
+bin/informationRetrieval/LuceneUtils.class
 data
 data2
 index
