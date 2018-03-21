@@ -28,6 +28,9 @@ public final class LuceneUtils{
 	public static final String CONTENTS = "contents";
 	public static final String FILE_NAME = "filename";
 	public static final String FILE_PATH = "filepath";
+	public static final String FILE_EXTENSION = "extension";
+	public static final String LAST_MODIFIED = "modifiedDate";
+	public static final String CREATED_AT = "creationDate";
 	public static final String LANGUAGE = "Romanian";
 	public static final int MAX_HITS = 10;
 	public static final CharArraySet STOPWORDS = getStopWords(stopwordFile);
