@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.io.*;
 import org.apache.lucene.analysis.TokenStream;
@@ -107,15 +109,34 @@ public class Indexer{
 			}
 		}
 		
-		// Index and store the contents of the file
+		// Index and store the Fields of the file
 		TextField contentField = new TextField(CONTENTS, tokens);
 		StringField nameField = new StringField(FILE_NAME, file.getName(), Field.Store.YES);
 		StringField pathField = new StringField(FILE_PATH, file.getCanonicalPath(), Field.Store.YES);
+		
+		// Store the last modified date of the file
+		Date lastModified = new Date(file.lastModified());
+		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+		String formattedDate = formatter.format(lastModified);
+		
+		TextField lastModifiedDateField = new TextField("modifiedDate", formattedDate, Field.Store.YES);
+		
+		// Store the extension of the file
+		String extension = "";
+
+		int i = file.getCanonicalPath().lastIndexOf('.');
+		if (i >= 0) {
+		    extension = file.getCanonicalPath().substring(i+1);
+		}
+		
+		TextField extensionField = new TextField("extension", extension, Field.Store.YES);
 		
 		// Add the Fields to the Document
 		doc.add(contentField);
 		doc.add(nameField);
 		doc.add(pathField);
+		doc.add(lastModifiedDateField);
+		doc.add(extensionField);
 		
 //		tokens.close(); // Can't close the Stream because the TokenStream contract is violated
 		
