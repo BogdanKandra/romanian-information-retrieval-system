@@ -1,9 +1,6 @@
 .settings
-bin
-bin/informationRetrieval/Indexer.class
-bin/informationRetrieval/Launcher.class
-bin/informationRetrieval/LuceneUtils.class
-data
-data2
-index
+bin/
+data/
+data2/
+index/
 phase2.txt
