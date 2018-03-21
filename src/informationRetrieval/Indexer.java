@@ -5,8 +5,10 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -114,12 +116,20 @@ public class Indexer{
 		StringField nameField = new StringField(FILE_NAME, file.getName(), Field.Store.YES);
 		StringField pathField = new StringField(FILE_PATH, file.getCanonicalPath(), Field.Store.YES);
 		
-		// Store the last modified date of the file
-		Date lastModified = new Date(file.lastModified());
+		// Store the file creation date
+		BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
+		long milliseconds = attr.creationTime().toMillis();
+		Date creation = new Date(milliseconds);
 		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-		String formattedDate = formatter.format(lastModified);
+		String formattedDate = formatter.format(creation);
 		
-		TextField lastModifiedDateField = new TextField("modifiedDate", formattedDate, Field.Store.YES);
+		TextField creationDateField = new TextField(CREATED_AT, formattedDate, Field.Store.YES);
+
+		// Store the file last modification date
+		Date lastModified = new Date(file.lastModified());
+		formattedDate = formatter.format(lastModified);
+		
+		TextField lastModifiedDateField = new TextField(LAST_MODIFIED, formattedDate, Field.Store.YES);
 		
 		// Store the extension of the file
 		String extension = "";
@@ -129,12 +139,13 @@ public class Indexer{
 		    extension = file.getCanonicalPath().substring(i+1);
 		}
 		
-		TextField extensionField = new TextField("extension", extension, Field.Store.YES);
+		TextField extensionField = new TextField(FILE_EXTENSION, extension, Field.Store.YES);
 		
 		// Add the Fields to the Document
 		doc.add(contentField);
 		doc.add(nameField);
 		doc.add(pathField);
+		doc.add(creationDateField);
 		doc.add(lastModifiedDateField);
 		doc.add(extensionField);
 		
