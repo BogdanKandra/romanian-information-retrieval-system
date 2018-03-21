@@ -1,5 +1,6 @@
 .settings
 bin
+bin/informationRetrieval
 data
 data2
 index
