@@ -28,8 +28,8 @@ public final class LuceneUtils{
 	public static final String CONTENTS = "contents";
 	public static final String FILE_NAME = "filename";
 	public static final String FILE_PATH = "filepath";
-	public static final int MAX_HITS = 10;
 	public static final String LANGUAGE = "Romanian";
+	public static final int MAX_HITS = 10;
 	public static final CharArraySet STOPWORDS = getStopWords(stopwordFile);
 	
 	// Make the constructor private, as to prevent the creation of an object of this type
