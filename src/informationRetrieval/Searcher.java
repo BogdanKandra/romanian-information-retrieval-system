@@ -21,7 +21,7 @@ import static informationRetrieval.LuceneUtils.*;
 /**
  * The <i>Searcher</i> class.
  * <p> Takes an index directory and a user query string replacing diacritics. <p>
- * <p> <b>TODO:</b> Make the search work for other fields as well and use multiple queries. </p>
+ * <p> <b>TODO:</b> Use multiple queries </p>
  * @version 2.0
  * @author Bogdan
  */
@@ -40,7 +40,7 @@ public class Searcher{
 	}
 
 	@SuppressWarnings("resource")
-	public Searcher(String indexDirPath, String userQuery) throws IOException{
+	public Searcher(String indexDirPath, String userQuery, String field) throws IOException{
 		
 		Directory indexDirectory = FSDirectory.open(new File(indexDirPath).toPath());
 		IndexReader indexReader = DirectoryReader.open(indexDirectory);
@@ -50,7 +50,7 @@ public class Searcher{
 		queryString = removeDiacritics(queryString); /// Move this in setter for queryString
 		
 		SearchAnalyzer analyzer = new SearchAnalyzer(queryString); /// Tokenizes, stems and lower cases the query string
-		queryParser = new QueryParser(CONTENTS, analyzer); // Will search in the CONTENTS field, using the defined analyzer
+		queryParser = new QueryParser(field, analyzer); // Will search in the given field, using the defined analyzer
 	}
 	
 	// Performs the search and returns the specified number of results
