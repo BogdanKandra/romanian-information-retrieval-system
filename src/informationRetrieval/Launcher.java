@@ -2,14 +2,12 @@ package informationRetrieval;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Locale;
+import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -29,11 +27,18 @@ import static informationRetrieval.LuceneUtils.*; // Static import allows for st
  */
 public class Launcher {
 
+	private static final Logger LOGGER = Logger.getLogger(Launcher.class.getName());
+	private static final String queryFileContents = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesContents.txt";
+	private static final String queryFileExtension = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesExtension.txt";
+	private static final String queryFileModifiedDate = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesModifiedDate.txt";
+	private static final String queryFileName = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesName.txt";
+	
 	private String indexDir = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\index";
 	private String dataDir  = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\data";
-	private static String queryPath= "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queries.txt";
+
 	private Indexer indexer;
 	private Searcher searcher;
+	private static boolean flag = true;
 	
 	public String getIndexDir() {
 		return indexDir;
@@ -52,9 +57,9 @@ public class Launcher {
 	}
 	
 	// Creates the Index, filtering the documents from the data folder according to the specified filter
-	private void index() throws IOException{
+	private void index(String indexOpenMode) throws IOException{
 		
-		indexer = new Indexer(indexDir);
+		indexer = new Indexer(indexDir, indexOpenMode);
 		int numIndexed;
 		long startTime = System.currentTimeMillis();
 		// Effectively create the Index, specifying the filter to be applied to the documents
@@ -69,19 +74,20 @@ public class Launcher {
 	}
 	
 	// Performs the Search using the query string provided
-	private void search(String searchQuery) throws IOException, ParseException{
-		
-		searcher = new Searcher(indexDir, searchQuery);
+	private void search(String searchQuery, String field) throws IOException, ParseException{
+		/// I want a single instance of Searcher (do not create the object for each search)
+
+		searcher = new Searcher(indexDir, searchQuery, field);
 		long startTime = System.currentTimeMillis();
 		TopDocs docs = searcher.search(searcher.getQueryString());
 		long endTime = System.currentTimeMillis();
 		
-		if(docs.totalHits == 1){
+		if(docs.totalHits == 1) {
 			System.out.println("==================================================");
 			System.out.println("QUERY: " + searchQuery);
 			System.out.println(1 + " document found; time elapsed: " + (endTime - startTime) + " ms\n");
 		}
-		else{
+		else {
 			System.out.println("==================================================");
 			System.out.println("QUERY: " + searchQuery);
 			System.out.println(docs.totalHits + " documents found; time elapsed: " + (endTime - startTime) + " ms\n");
@@ -97,7 +103,8 @@ public class Launcher {
 		System.out.println("==================================================\n");
 	}
 	
-	private void search(Scanner in){
+	// Reads queries from a text file and passes them to the search method
+	private void search(Scanner in, String field){
 		
 		String query;
 		
@@ -106,7 +113,7 @@ public class Launcher {
 			query = in.nextLine();
 			
 			try {
-				search(query);
+				search(query, field);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ParseException e) {
@@ -115,22 +122,193 @@ public class Launcher {
 		}
 	}
 	
-	public static void main(String[] args){
+	private void searchMenu(Scanner in) {
 		
-		Launcher launcher = null;
+		System.out.println("What criterion do you want to search by?");
+		System.out.println("1. Contents");
+		System.out.println("2. Extension");
+		System.out.println("3. Last modified date");
+		System.out.println("4. Extension AND Last modified date");
+		System.out.println("5. Name");
+		
+		int option;
+		File queryFile = null;
+		FileInputStream fis = null;
+		Scanner fileIn = null;
 		
 		try{
-			launcher = new Launcher();
-			launcher.index();
-			File queryFile = new File(queryPath);
-			FileInputStream fis = new FileInputStream(queryFile);
-			Scanner in = new Scanner(fis);
-			launcher.search(in);
-			in.close();
-			fis.close();
-		} catch(IOException e){
-			e.printStackTrace();
+			System.out.print("Enter option: ");
+			option = in.nextInt();
+			
+			if((option < 1) || (option > 5)) {
+				throw new InputMismatchException();
+			}
+			
+			if(option == 1) {  // Search by contents
+
+				queryFile = new File(queryFileContents);
+				fis = new FileInputStream(queryFile);
+				fileIn = new Scanner(fis);
+				
+				search(fileIn, CONTENTS);
+			}
+			else if(option == 2) {  // Search by extension
+
+				queryFile = new File(queryFileExtension);
+				fis = new FileInputStream(queryFile);
+				fileIn = new Scanner(fis);
+				
+				search(fileIn, FILE_EXTENSION);
+			}
+			else if(option == 3) {  // Search by last modified date
+
+				queryFile = new File(queryFileModifiedDate);
+				fis = new FileInputStream(queryFile);
+				fileIn = new Scanner(fis);
+				
+				search(fileIn, LAST_MODIFIED);
+			}
+			else if(option == 4) {  // Search by extension AND last modified date
+				
+			}
+			else {  // Search by file name
+
+				queryFile = new File(queryFileName);
+				fis = new FileInputStream(queryFile);
+				fileIn = new Scanner(fis);
+				
+				search(fileIn, FILE_NAME);
+			}
+		} catch (InputMismatchException ex){
+			System.out.println("You have to enter a number between 1 and 4 !");
+			in.nextLine();
+			searchMenu(in);
+		} catch (FileNotFoundException e) {
+			LOGGER.log(Level.SEVERE, e.toString(), e);
+		} finally {
+			fileIn.close();
+			
+			try {
+				fis.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
+	}
+	
+	private void indexMenu(Scanner in) {
+		
+		System.out.println("The index already exists. Choose to:");
+		System.out.println("1. Rebuild the index from scratch");
+		System.out.println("2. Append to existing index");
+		System.out.println("3. Go to the Search menu instead");
+		
+		int option;
+		
+		try{
+			System.out.print("Enter option: ");
+			option = in.nextInt();
+			
+			if((option < 1) || (option > 3)) {
+				throw new InputMismatchException();
+			}
+			
+			if(option == 1) {  // Rebuild the index
+				
+				System.out.println("Rebuilding index...");
+				index("CREATE");
+				System.out.println("Rebuilding the index complete!\n");
+			}
+			else if(option == 2) {  // Append to the index
+/// TODO - Problem with appending to index				
+				System.out.println("Appending new documents to existing index...");
+				index("APPEND");
+				System.out.println("Appending to the index complete!\n");
+			}
+			else {  // Go to the search menu
+				
+				searchMenu(in);
+			}
+		} catch (InputMismatchException ex){
+			System.out.println("You have to enter either 1, 2 or 3 !");
+			in.nextLine();
+			indexMenu(in);
+		} catch (IOException e) {
+			LOGGER.log(Level.SEVERE, e.toString(), e);
+		}
+	}
+	
+	private int printMainMenu(Scanner in) {
+		
+		System.out.println("What do you want to do?");
+		System.out.println("1. Index");
+		System.out.println("2. Search");
+		System.out.println("3. Quit");
+		
+		int option = 0;
+		
+		try{
+			System.out.print("Enter Option: ");
+			option = in.nextInt();
+			
+			if ((option < 1) || (option > 3)) {
+				throw new InputMismatchException();
+			}
+		} catch (InputMismatchException ex){
+			System.out.println("You have to enter either 1, 2 or 3 !");
+			in.nextLine(); // Consume the \n character left by nextInt() in the buffer
+			option = printMainMenu(in);
+		}
+		
+		return option;
+	}
+	
+	public void loop() {
+		
+		Scanner in = new Scanner(System.in);
+		
+		while(flag) {
+			
+			int option = printMainMenu(in);
+			
+			if(option == 1) {  // The user wants to Index
+				
+				File[] files = new File(getIndexDir()).listFiles();
+				
+				if(files.length == 0) {  // The index does not exist, a new one is created
+					
+					System.out.println("Indexing folder...");
+					
+					try {
+						index("CREATE");
+					} catch (IOException e) {
+						LOGGER.log(Level.SEVERE, e.toString(), e);
+					}
+					
+					System.out.println("Indexing complete!\n");
+				}
+				else {  // The index already exists
+					
+					indexMenu(in);
+				}
+			}
+			else if(option == 2) {  // The user wants to Search
+				
+				searchMenu(in);
+			}
+			else {  // The user wants to Quit
+				flag = false;
+				System.out.println("Goodbye!\n");
+			}
+		}
+		
+		in.close();
+	}
+	
+	public static void main(String[] args){
+		
+		Launcher launcher = new Launcher();
+		launcher.loop();
 		
 /*		File[] files = new File("F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\data").listFiles();
 		
