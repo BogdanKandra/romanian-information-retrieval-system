@@ -51,13 +51,19 @@ public class Indexer{
 	 * @throws InvalidPathException
 	 * @throws IOException
 	 */
-	public Indexer(String indexDirPath) throws InvalidPathException, IOException{
+	public Indexer(String indexDirPath, String openMode) throws InvalidPathException, IOException{
 		
 		@SuppressWarnings("resource")
 		Directory indexDir = FSDirectory.open(Paths.get(indexDirPath));
 		
 		IndexWriterConfig conf = new IndexWriterConfig(); // The default constructor user the StandardAnalyzer as an analyzer
-		conf.setOpenMode(OpenMode.CREATE);
+		
+		if(openMode.equals("CREATE"))
+			conf.setOpenMode(OpenMode.CREATE);
+		else if(openMode.equals("APPEND"))
+			conf.setOpenMode(OpenMode.APPEND);
+		else
+			conf.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		
 		writer = new IndexWriter(indexDir, conf);
 	}
