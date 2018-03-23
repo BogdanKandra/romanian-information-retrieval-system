@@ -1,0 +1,6 @@
+doc
+docx
+ppt
+pptx
+txt
+exe
