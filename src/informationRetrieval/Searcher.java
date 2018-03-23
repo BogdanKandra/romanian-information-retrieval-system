@@ -21,7 +21,7 @@ import static informationRetrieval.LuceneUtils.*;
 /**
  * The <i>Searcher</i> class.
  * <p> Takes an index directory and a user query string replacing diacritics. <p>
- * <p> <b>TODO:</b> Make the search work for file titles as well and use multiple queries. </p>
+ * <p> <b>TODO:</b> Make the search work for other fields as well and use multiple queries. </p>
  * @version 2.0
  * @author Bogdan
  */
@@ -29,15 +29,14 @@ public class Searcher{
 	
 	private IndexSearcher searcher;
 	private QueryParser queryParser;
-	private Query query;
 	private String queryString;
 	
 	public String getQueryString() {
 		return queryString;
 	}
-
+	
 	public void setQueryString(String qs) {
-		this.queryString = qs;
+		queryString = qs;
 	}
 
 	@SuppressWarnings("resource")
@@ -48,16 +47,16 @@ public class Searcher{
 		searcher = new IndexSearcher(indexReader);
 		
 		queryString = userQuery;
-		queryString = removeDiacritics(queryString);
+		queryString = removeDiacritics(queryString); /// Move this in setter for queryString
 		
-		SearchAnalyzer analyzer = new SearchAnalyzer(queryString);
-		queryParser = new QueryParser(CONTENTS, analyzer);
+		SearchAnalyzer analyzer = new SearchAnalyzer(queryString); /// Tokenizes, stems and lower cases the query string
+		queryParser = new QueryParser(CONTENTS, analyzer); // Will search in the CONTENTS field, using the defined analyzer
 	}
 	
 	// Performs the search and returns the specified number of results
 	public TopDocs search(String searchQuery) throws IOException, ParseException{
 		
-		query = queryParser.parse(searchQuery);
+		Query query = queryParser.parse(searchQuery);
 		return searcher.search(query, MAX_HITS);
 	}
 	
