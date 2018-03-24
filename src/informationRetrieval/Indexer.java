@@ -117,7 +117,7 @@ public class Indexer{
 			}
 		}
 		
-		// Index and store the Fields of the file
+		// Index and store the contents, name and path of the file
 		TextField contentField = new TextField(CONTENTS, tokens);
 		StringField nameField = new StringField(FILE_NAME, file.getName(), Field.Store.YES);
 		StringField pathField = new StringField(FILE_PATH, file.getCanonicalPath(), Field.Store.YES);
