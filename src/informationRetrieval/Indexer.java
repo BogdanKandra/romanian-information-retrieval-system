@@ -9,11 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.io.*;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.document.DateTools;
+import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -126,16 +127,15 @@ public class Indexer{
 		BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
 		long milliseconds = attr.creationTime().toMillis();
 		Date creation = new Date(milliseconds);
-		SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
-		String formattedDate = formatter.format(creation);
+		String formattedDate = DateTools.dateToString(creation, Resolution.DAY);
 		
-		TextField creationDateField = new TextField(CREATED_AT, formattedDate, Field.Store.YES);
+		StringField creationDateField = new StringField(CREATED_AT, formattedDate, Field.Store.YES);
 
 		// Store the file last modification date
 		Date lastModified = new Date(file.lastModified());
-		formattedDate = formatter.format(lastModified);
+		formattedDate = DateTools.dateToString(lastModified, Resolution.DAY);
 		
-		TextField lastModifiedDateField = new TextField(LAST_MODIFIED, formattedDate, Field.Store.YES);
+		StringField lastModifiedDateField = new StringField(LAST_MODIFIED, formattedDate, Field.Store.YES);
 		
 		// Store the extension of the file
 		String extension = "";
@@ -145,7 +145,7 @@ public class Indexer{
 		    extension = file.getCanonicalPath().substring(i+1);
 		}
 		
-		TextField extensionField = new TextField(FILE_EXTENSION, extension, Field.Store.YES);
+		StringField extensionField = new StringField(FILE_EXTENSION, extension, Field.Store.YES);
 		
 		// Add the Fields to the Document
 		doc.add(contentField);
