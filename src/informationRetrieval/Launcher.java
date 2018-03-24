@@ -32,6 +32,7 @@ public class Launcher {
 	private static final String queryFileExtension = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesExtension.txt";
 	private static final String queryFileModifiedDate = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesModifiedDate.txt";
 	private static final String queryFileName = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesName.txt";
+	private static final String queryFileExtensionDate = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesExtensionDate.txt";
 	
 	private String indexDir = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\index";
 	private String dataDir  = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\data";
@@ -78,9 +79,28 @@ public class Launcher {
 		/// I want a single instance of Searcher (do not create the object for each search)
 
 		searcher = new Searcher(indexDir, searchQuery, field);
-		long startTime = System.currentTimeMillis();
-		TopDocs docs = searcher.search(searcher.getQueryString());
-		long endTime = System.currentTimeMillis();
+		TopDocs docs = null;
+		long startTime = 0;
+		long endTime = 0;
+		
+		if((field.equals(LAST_MODIFIED)) || (field.equals(CREATED_AT))) {
+
+			startTime = System.currentTimeMillis();
+			docs = searcher.searchDate(searcher.getQueryString(), field);  // Should catch IOException
+			endTime = System.currentTimeMillis();
+		}
+		else if(field.equals(FILE_EXTENSION_DATE)) {
+			
+			startTime = System.currentTimeMillis();
+			docs = searcher.searchExtensionDate(searcher.getQueryString());
+			endTime = System.currentTimeMillis();
+		}
+		else {  // Searching for anything else
+
+			startTime = System.currentTimeMillis();
+			docs = searcher.search(searcher.getQueryString());
+			endTime = System.currentTimeMillis();
+		}
 		
 		if(docs.totalHits == 1) {
 			System.out.println("==================================================");
@@ -106,22 +126,44 @@ public class Launcher {
 	// Reads queries from a text file and passes them to the search method
 	private void search(Scanner in, String field){
 		
-		String query;
-		
-		while(in.hasNextLine()){
+		if(field.equals(FILE_EXTENSION_DATE)) {
 			
-			query = in.nextLine();
+			String query, extension, date;
 			
-			try {
-				search(query, field);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (ParseException e) {
-				e.printStackTrace();
+			while(in.hasNextLine()){
+				
+				extension = in.nextLine();
+				date = in.nextLine();
+				query = extension + "#" + date;
+				
+				try {
+					search(query, field);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		else {
+			
+			String query;
+			
+			while(in.hasNextLine()){
+				
+				query = in.nextLine();
+				
+				try {
+					search(query, field);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
-	
+		
 	private void searchMenu(Scanner in) {
 		
 		System.out.println("What criterion do you want to search by?");
@@ -170,6 +212,11 @@ public class Launcher {
 			}
 			else if(option == 4) {  // Search by extension AND last modified date
 				
+				queryFile = new File(queryFileExtensionDate);
+				fis = new FileInputStream(queryFile);
+				fileIn = new Scanner(fis);
+				
+				search(fileIn, FILE_EXTENSION_DATE);
 			}
 			else {  // Search by file name
 
@@ -186,13 +233,14 @@ public class Launcher {
 		} catch (FileNotFoundException e) {
 			LOGGER.log(Level.SEVERE, e.toString(), e);
 		} finally {
-			fileIn.close();
-			
-			try {
-				fis.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			if(!(fileIn == null))
+				fileIn.close();
+			if(!(fis == null))
+				try {
+					fis.close();
+				} catch (IOException e) {
+					LOGGER.log(Level.SEVERE, e.toString(), e);
+				}
 		}
 	}
 	
@@ -309,26 +357,5 @@ public class Launcher {
 		
 		Launcher launcher = new Launcher();
 		launcher.loop();
-		
-/*		File[] files = new File("F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\data").listFiles();
-		
-		for(File f : files){
-			Date lastModified = new Date(f.lastModified());
-			SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-			String formattedDate = formatter.format(lastModified);
-			
-			System.out.println(formattedDate);*/
-			
-/*			DateTimeFormatter df = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", Locale.UK);
-			LocalDateTime d = LocalDateTime.parse(formattedDate, df);*/
-/*			Date d;
-			try {
-				d = formatter.parse(formattedDate);
-				System.out.println(d.toString());
-			} catch (java.text.ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
-//		}
 	}
 }
