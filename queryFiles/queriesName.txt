@@ -1,4 +1,7 @@
 test.docx
-textTXT.txt
-blabla.doc
 testPPT.pptx
+testTXT.txt
+blabla.doc
+testWord2003.doc
+testWord2007.docx
+testWord2007.doc
