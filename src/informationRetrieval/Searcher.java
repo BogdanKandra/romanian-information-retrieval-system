@@ -3,6 +3,8 @@ package informationRetrieval;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.DirectoryReader;
@@ -47,10 +49,16 @@ public class Searcher{
 		searcher = new IndexSearcher(indexReader);
 		
 		queryString = userQuery;
-		queryString = removeDiacritics(queryString); /// Move this in setter for queryString
+		Analyzer analyzer;
 		
-		SearchAnalyzer analyzer = new SearchAnalyzer(queryString); /// Tokenizes, stems and lower cases the query string
-		queryParser = new QueryParser(field, analyzer); // Will search in the given field, using the defined analyzer
+		if(field == CONTENTS) {  // Query string must be processed by our SearchAnalyzer
+			queryString = removeDiacritics(queryString); /// Move this in setter for queryString
+			analyzer = new SearchAnalyzer(queryString); /// Tokenizes, stems and lower cases the query string
+		}
+		else {  // Query string must keep its initial form
+			analyzer = new KeywordAnalyzer();
+		}
+			queryParser = new QueryParser(field, analyzer); // Will search in the given field, using the defined analyzer
 	}
 	
 	// Performs the search and returns the specified number of results
