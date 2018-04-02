@@ -31,6 +31,7 @@ public final class LuceneUtils{
 	public static final String FILE_EXTENSION = "extension";
 	public static final String LAST_MODIFIED = "modifiedDate";
 	public static final String FILE_EXTENSION_DATE = FILE_EXTENSION + "|" + LAST_MODIFIED;
+	public static final String FILE_CONTENTS_EXTENSION_DATE = CONTENTS + "|" + FILE_EXTENSION + "|" + LAST_MODIFIED;
 	public static final String CREATED_AT = "creationDate";
 	public static final String LANGUAGE = "Romanian";
 	public static final int MAX_HITS = 10;
