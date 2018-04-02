@@ -230,10 +230,14 @@ public class Launcher {
 	// Reads queries from the generic queries file, processes them and passes them to the search method
 	private void search(Scanner in) {
 		
-		String query, contents = "#", extension = "#", date = "#";
+		String query, contents, extension, date;
 		String[] components;
 		
 		while(in.hasNextLine()) {
+			
+			contents = "#";
+			extension = "#";
+			date = "#";
 			
 			query = in.nextLine();
 			components = query.split("\\|");
@@ -248,6 +252,9 @@ public class Launcher {
 				else if(!(component.equals(""))) // Component must be contents
 					contents = component;
 			}
+			
+			if(!(extension.equals("#")))  // Remove the . (dot) from the extension
+					extension = extension.substring(1);
 			
 			query = contents + "|" + extension + "|" + date;
 			
