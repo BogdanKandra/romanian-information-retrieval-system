@@ -33,6 +33,7 @@ public class Launcher {
 	private static final String queryFileModifiedDate = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesModifiedDate.txt";
 	private static final String queryFileName = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesName.txt";
 	private static final String queryFileExtensionDate = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queriesExtensionDate.txt";
+	private static final String queries = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queries.txt";
 	
 	private String indexDir = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\index";
 	private String dataDir  = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\data";
@@ -95,6 +96,12 @@ public class Launcher {
 			docs = searcher.searchExtensionDate(searcher.getQueryString());
 			endTime = System.currentTimeMillis();
 		}
+		else if(field.equals(FILE_CONTENTS_EXTENSION_DATE)) {
+			
+			startTime = System.currentTimeMillis();
+			docs = searcher.searchContentsExtensionDate(searcher.getQueryString());
+			endTime = System.currentTimeMillis();
+		}
 		else {  // Searching for anything else
 
 			startTime = System.currentTimeMillis();
@@ -123,7 +130,41 @@ public class Launcher {
 		System.out.println("==================================================\n");
 	}
 	
+	// Performs the search using the query string provided (in the form 'contents|extension|date', any of them possibly being empty strings)
+	private void search(String queryString) throws IOException, ParseException {
+		
+		searcher = new Searcher(indexDir, queryString);
+		TopDocs docs = null;
+		long startTime = 0;
+		long endTime = 0;
+		
+		startTime = System.currentTimeMillis();
+		docs = searcher.search(searcher.getQueryString()); // ???
+		endTime = System.currentTimeMillis();
+		
+		if(docs.totalHits == 1) {
+			System.out.println("==================================================");
+			System.out.println("QUERY: " + queryString);
+			System.out.println(1 + " document found; time elapsed: " + (endTime - startTime) + " ms\n");
+		}
+		else {
+			System.out.println("==================================================");
+			System.out.println("QUERY: " + queryString);
+			System.out.println(docs.totalHits + " documents found; time elapsed: " + (endTime - startTime) + " ms\n");
+		}
+		
+		// Print the name of the file results, in order of their score
+		ScoreDoc[] hits = docs.scoreDocs;
+		for(ScoreDoc scoreDoc : hits){
+			
+			Document doc = searcher.getDocument(scoreDoc);
+			System.out.println("File: " + doc.get(FILE_NAME) + "  (Path: " + doc.get(FILE_PATH) + ")");
+		}
+		System.out.println("==================================================\n");
+	}
+	
 	// Reads queries from a text file and passes them to the search method
+	// TODO: Cleanup here
 	private void search(Scanner in, String field){
 		
 		if(field.equals(FILE_EXTENSION_DATE)) {
@@ -135,6 +176,26 @@ public class Launcher {
 				extension = in.nextLine();
 				date = in.nextLine();
 				query = extension + "#" + date;
+				
+				try {
+					search(query, field);
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		else if(field.equals(FILE_CONTENTS_EXTENSION_DATE)) {
+			
+			String query, contents, extension, date;
+			
+			while(in.hasNextLine()) {
+				
+				contents = in.nextLine();
+				extension = in.nextLine();
+				date = in.nextLine();
+				query = contents + "#" + extension + "#" + date;
 				
 				try {
 					search(query, field);
@@ -163,6 +224,40 @@ public class Launcher {
 			}
 		}
 	}
+	
+	// Reads queries from the generic queries file, processes them and passes them to the search method
+	private void search(Scanner in) {
+		
+		String query, contents = "#", extension = "#", date = "#";
+		String[] components;
+		
+		while(in.hasNextLine()) {
+			
+			query = in.nextLine();
+			components = query.split("\\|");
+			
+			for(String component : components) {
+				
+				component = component.trim();
+				if(component.startsWith("."))    // Component must be extension
+					extension = component;
+				else if(component.contains(".")) // Component must be date
+					date = component;
+				else if(!(component.equals(""))) // Component must be contents
+					contents = component;
+			}
+			
+			query = contents + "|" + extension + "|" + date;
+			
+			try {
+				search(query);
+			} catch (IOException e) {
+				LOGGER.log(Level.SEVERE, e.toString(), e);
+			} catch (ParseException e) {
+				LOGGER.log(Level.SEVERE, e.toString(), e);
+			}
+		}
+	}
 		
 	private void searchMenu(Scanner in) {
 		
@@ -172,6 +267,7 @@ public class Launcher {
 		System.out.println("3. Last modified date");
 		System.out.println("4. Extension AND Last modified date");
 		System.out.println("5. Name");
+		System.out.println("6. Generic Search");
 		
 		int option;
 		File queryFile = null;
@@ -182,7 +278,7 @@ public class Launcher {
 			System.out.print("Enter option: ");
 			option = in.nextInt();
 			
-			if((option < 1) || (option > 5)) {
+			if((option < 1) || (option > 6)) {
 				throw new InputMismatchException();
 			}
 			
@@ -218,13 +314,21 @@ public class Launcher {
 				
 				search(fileIn, FILE_EXTENSION_DATE);
 			}
-			else {  // Search by file name
+			else if(option == 5) {  // Search by file name
 
 				queryFile = new File(queryFileName);
 				fis = new FileInputStream(queryFile);
 				fileIn = new Scanner(fis);
 				
 				search(fileIn, FILE_NAME);
+			}
+			else {  // Perform a generic search
+				
+				queryFile = new File(queries);
+				fis = new FileInputStream(queryFile);
+				fileIn = new Scanner(fis);
+				
+				search(fileIn);
 			}
 		} catch (InputMismatchException ex){
 			System.out.println("You have to enter a number between 1 and 4 !");
@@ -267,8 +371,8 @@ public class Launcher {
 				index("CREATE");
 				System.out.println("Rebuilding the index complete!\n");
 			}
-			else if(option == 2) {  // Append to the index
-/// TODO - Problem with appending to index				
+			else if(option == 2) {  // Append to the existing index
+/// TODO - Problem with appending to index; existing files are being indexed again
 				System.out.println("Appending new documents to existing index...");
 				index("APPEND");
 				System.out.println("Appending to the index complete!\n");
@@ -323,7 +427,7 @@ public class Launcher {
 				
 				File[] files = new File(getIndexDir()).listFiles();
 				
-				if(files.length == 0) {  // The index does not exist, a new one is created
+				if(files.length == 0) {  // The index does not exist, create a new one
 					
 					System.out.println("Indexing folder...");
 					
