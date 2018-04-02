@@ -70,12 +70,12 @@ public class Launcher {
 		indexer.close();
 		
 		if(numIndexed == 1)
-			System.out.println(1 + " file indexed; time elapsed: " + (endTime - startTime) + " ms");
+			System.out.println("1 file indexed; time elapsed: " + (endTime - startTime) + " ms\n");
 		else
-			System.out.println(numIndexed + " files indexed; time elapsed: " + (endTime - startTime) + " ms");
+			System.out.println(numIndexed + " files indexed; time elapsed: " + (endTime - startTime) + " ms\n");
 	}
 	
-	// Performs the Search using the query string provided
+	// Performs the Search using the query string provided, on the field given
 	private void search(String searchQuery, String field) throws IOException, ParseException{
 		/// I want a single instance of Searcher (do not create the object for each search)
 
@@ -145,7 +145,7 @@ public class Launcher {
 		if(docs.totalHits == 1) {
 			System.out.println("==================================================");
 			System.out.println("QUERY: " + queryString);
-			System.out.println(1 + " document found; time elapsed: " + (endTime - startTime) + " ms\n");
+			System.out.println("1 document found; time elapsed: " + (endTime - startTime) + " ms\n");
 		}
 		else {
 			System.out.println("==================================================");
@@ -153,14 +153,16 @@ public class Launcher {
 			System.out.println(docs.totalHits + " documents found; time elapsed: " + (endTime - startTime) + " ms\n");
 		}
 		
-		// Print the name of the file results, in order of their score
-		ScoreDoc[] hits = docs.scoreDocs;
-		for(ScoreDoc scoreDoc : hits){
-			
-			Document doc = searcher.getDocument(scoreDoc);
-			System.out.println("File: " + doc.get(FILE_NAME) + "  (Path: " + doc.get(FILE_PATH) + ")");
+		// Print the name of the file results (if there are any), in order of their score
+		if(!(docs.totalHits == 0)) {
+			ScoreDoc[] hits = docs.scoreDocs;
+			for(ScoreDoc scoreDoc : hits){
+				
+				Document doc = searcher.getDocument(scoreDoc);
+				System.out.println("File: " + doc.get(FILE_NAME) + "  (Path: " + doc.get(FILE_PATH) + ")");
+			}
+			System.out.println("==================================================\n");
 		}
-		System.out.println("==================================================\n");
 	}
 	
 	// Reads queries from a text file and passes them to the search method
