@@ -2,19 +2,14 @@ package informationRetrieval;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.InvalidPathException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
-import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
@@ -48,9 +43,7 @@ public class Searcher{
 	
 	private static final Logger LOGGER = Logger.getLogger(Launcher.class.getName());
 	private IndexSearcher searcher;
-	private QueryParser queryParser;
 	private String queryString;
-	private PerFieldAnalyzerWrapper analyzer;
 	
 	public String getQueryString() {
 		return queryString;
@@ -77,7 +70,7 @@ public class Searcher{
 		String contents = components[0], extension = components[1], date = components[2];
 		Date tempDate = new Date();  // Initialise with current date
 		
-		if(!(date.equals("#"))) {
+		if(!(date.equals("#"))) {  // Convert the date to GMT timezone and Lucene format
 			
 			SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 			sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -98,15 +91,8 @@ public class Searcher{
 		if(!(contents.equals("#")))
 			contents = removeDiacritics(contents);
 		
-		queryString = contents + "|" + extension + "|" + date;
-		
-/*		Map<String, Analyzer> analyzerPerField = new HashMap<String, Analyzer>();
-		analyzerPerField.put(CONTENTS, new SearchAnalyzer(contents));
-		analyzerPerField.put(FILE_EXTENSION, new KeywordAnalyzer());
-		analyzerPerField.put(LAST_MODIFIED, new KeywordAnalyzer());
-		
-		analyzer = new PerFieldAnalyzerWrapper(new StandardAnalyzer(), analyzerPerField); // ??? Dead code?
-*/	}
+		queryString = contents + "|" + extension + "|" + date;		
+	}
 	
 	@SuppressWarnings("resource")
 	public Searcher(String indexDirPath, String userQuery, String field) throws IOException{
@@ -167,32 +153,40 @@ public class Searcher{
 		else {  // Query string must keep its initial form
 			analyzer = new KeywordAnalyzer();
 		}
-			queryParser = new QueryParser(field, analyzer); // Will search in the given field, using the defined analyzer
+			QueryParser queryParser = new QueryParser(field, analyzer); // Will search in the given field, using the defined analyzer
 	}
 	
 	// Performs the search and returns the specified number of results
 	public TopDocs search(String searchQuery) throws IOException, ParseException{
 		
+		BooleanQuery.Builder builder = new BooleanQuery.Builder();
 		String[] queries = searchQuery.split("\\|");
 		
-		String lowerDate = queries[2];
-		String upperDate = DateTools.dateToString(new Date(), Resolution.DAY);  // Current date
-		boolean includeLower = true;
-		boolean includeUpper = true;
+		if(!(queries[0].equals("#"))) {  // The user searches by contents
+			
+			QueryParser contentsQP = new QueryParser(CONTENTS, new SearchAnalyzer(queries[0]));
+			Query contentsQuery = contentsQP.parse(queries[0]);
+			builder.add(contentsQuery, Occur.MUST);
+		}
 		
-		QueryParser contentsQP = new QueryParser(CONTENTS, new SearchAnalyzer(queries[0]));
-		Query contentsQuery = contentsQP.parse(queries[0]);
+		if(!(queries[1].equals("#"))) {  // The user searches by extension
+			
+			QueryParser extensionQP = new QueryParser(FILE_EXTENSION, new KeywordAnalyzer());
+			Query extensionQuery = extensionQP.parse(queries[1]);
+			builder.add(extensionQuery, Occur.MUST);
+		}
 		
-		QueryParser extensionQP = new QueryParser(FILE_EXTENSION, new KeywordAnalyzer());
-		Query extensionQuery = extensionQP.parse(queries[1]);
-		
-//		QueryParser dateQP = new QueryParser(LAST_MODIFIED, new KeywordAnalyzer());
-		TermRangeQuery dateQuery = TermRangeQuery.newStringRange(LAST_MODIFIED, lowerDate, upperDate, includeLower, includeUpper);
-		
-		BooleanQuery.Builder builder = new BooleanQuery.Builder();
-		builder.add(contentsQuery, Occur.MUST);
-		builder.add(extensionQuery, Occur.MUST);
-		builder.add(dateQuery, Occur.MUST);
+		if(!(queries[2].equals("#"))) {  // The user searches by last modified date
+			
+			String lowerDate = queries[2];
+			String upperDate = DateTools.dateToString(new Date(), Resolution.DAY);  // Current date
+			boolean includeLower = true;
+			boolean includeUpper = true;
+			
+			TermRangeQuery dateQuery = TermRangeQuery.newStringRange(LAST_MODIFIED, lowerDate, upperDate, includeLower, includeUpper);
+			builder.add(dateQuery, Occur.MUST);
+		}
+
 		BooleanQuery query = builder.build();
 		
 		return searcher.search(query, MAX_HITS);
