@@ -149,7 +149,7 @@ public class Launcher {
 	private void searchMenu(Scanner in) {
 		
 		System.out.println("What criterion do you want to search by?");
-		System.out.println("1. Generic Search");
+		System.out.println("1. Generic Search in Queries File");
 		
 		int option;
 		File queryFile = null;
