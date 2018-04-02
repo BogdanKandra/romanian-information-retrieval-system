@@ -19,7 +19,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 /**
  * Constants used in the project.
  * <p> <b>TODO:</b> Get the stopword file and max hits as input in graphic interface (getter and setter) </p>
- * @version 2.0
+ * @version 2.5
  * @author Bogdan
  */
 public final class LuceneUtils{
@@ -30,8 +30,6 @@ public final class LuceneUtils{
 	public static final String FILE_PATH = "filepath";
 	public static final String FILE_EXTENSION = "extension";
 	public static final String LAST_MODIFIED = "modifiedDate";
-	public static final String FILE_EXTENSION_DATE = FILE_EXTENSION + "|" + LAST_MODIFIED;
-	public static final String FILE_CONTENTS_EXTENSION_DATE = CONTENTS + "|" + FILE_EXTENSION + "|" + LAST_MODIFIED;
 	public static final String CREATED_AT = "creationDate";
 	public static final String LANGUAGE = "Romanian";
 	public static final int MAX_HITS = 10;
@@ -51,12 +49,7 @@ public final class LuceneUtils{
 		
 		return s;
 	}
-	
-	/**
-	 * @param contents
-	 * @return
-	 * @throws IOException
-	 */
+
 	static final TokenStream getTokenStream(String contents) throws IOException{
 		
 		Tokenizer tokenizer = new StandardTokenizer();

@@ -35,8 +35,7 @@ import static informationRetrieval.LuceneUtils.*;
 /**
  * The <i>Searcher</i> class.
  * <p> Takes an index directory and a user query string replacing diacritics. <p>
- * <p> <b>TODO:</b> Use multiple queries </p>
- * @version 2.0
+ * @version 2.5
  * @author Bogdan
  */
 public class Searcher{
@@ -94,69 +93,8 @@ public class Searcher{
 		queryString = contents + "|" + extension + "|" + date;		
 	}
 	
-	@SuppressWarnings("resource")
-	public Searcher(String indexDirPath, String userQuery, String field) throws IOException{
-		
-		Directory indexDirectory = FSDirectory.open(new File(indexDirPath).toPath());
-		IndexReader indexReader = DirectoryReader.open(indexDirectory);
-		searcher = new IndexSearcher(indexReader);
-		
-		queryString = userQuery;
-		Analyzer analyzer;
-		Date tempDate = new Date(); // Initialize with current date
-		
-		if(field.equals(CONTENTS)) {  // Query string must be processed by our SearchAnalyzer
-			queryString = removeDiacritics(queryString); /// Move this in setter for queryString
-			analyzer = new SearchAnalyzer(queryString); /// Tokenizes, stems and lower cases the query string
-		}
-		else if((field.equals(LAST_MODIFIED)) || (field.equals(CREATED_AT))) {  // Query string is a date
-			try {
-				SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-				tempDate = sdf.parse(queryString);
-			} catch (java.text.ParseException e) { // If the date format is not correct, keep the current date
-				LOGGER.log(Level.SEVERE, e.toString(), e);
-			}
-			queryString = DateTools.dateToString(tempDate, Resolution.DAY);
-			analyzer = new KeywordAnalyzer();
-		}
-		else if(field.equals(FILE_EXTENSION_DATE)) {  // Searching by both extension AND date
-
-			String[] queries = userQuery.split("#");
-			
-			try {
-				SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-				tempDate = sdf.parse(queries[1]);
-			} catch (java.text.ParseException e) { // If the date format is not correct, keep the current date
-				LOGGER.log(Level.SEVERE, e.toString(), e);
-			}
-			queryString = queries[0] + "#" + DateTools.dateToString(tempDate, Resolution.DAY);
-			analyzer = new KeywordAnalyzer();
-		}
-		else if(field.equals(FILE_CONTENTS_EXTENSION_DATE)) {  // Searching by contents, extension AND date
-			
-			String[] queries = userQuery.split("#");
-			String contents = removeDiacritics(queries[0]);
-			/// Apply SearchAnalyzer pe contents
-			
-			try {
-				SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-				sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-				tempDate = sdf.parse(queries[2]);
-			} catch (java.text.ParseException e) { // If the date format is not correct, keep the current date
-				LOGGER.log(Level.SEVERE, e.toString(), e);
-			}
-			queryString = contents + "#" + queries[1] + "#" + DateTools.dateToString(tempDate, Resolution.DAY);
-			analyzer = new KeywordAnalyzer();
-		}
-		else {  // Query string must keep its initial form
-			analyzer = new KeywordAnalyzer();
-		}
-			QueryParser queryParser = new QueryParser(field, analyzer); // Will search in the given field, using the defined analyzer
-	}
-	
 	// Performs the search and returns the specified number of results
+	// TODO -- Add logic for other fields to the query string
 	public TopDocs search(String searchQuery) throws IOException, ParseException{
 		
 		BooleanQuery.Builder builder = new BooleanQuery.Builder();
@@ -187,57 +125,6 @@ public class Searcher{
 			builder.add(dateQuery, Occur.MUST);
 		}
 
-		BooleanQuery query = builder.build();
-		
-		return searcher.search(query, MAX_HITS);
-	}
-	
-	public TopDocs searchDate(String queryDate, String field) throws IOException {
-		
-		String lowerDate = queryDate;
-		String upperDate = DateTools.dateToString(new Date(), Resolution.DAY);  // Current date
-		boolean includeLower = true;
-		boolean includeUpper = true;
-		
-		TermRangeQuery query = TermRangeQuery.newStringRange(field, lowerDate, upperDate, includeLower, includeUpper);
-		return searcher.search(query, MAX_HITS);
-	}
-	
-	public TopDocs searchExtensionDate(String searchQuery) throws IOException {
-		
-		String[] queries = searchQuery.split("#");
-		String lowerDate = queries[1];
-		String upperDate = DateTools.dateToString(new Date(), Resolution.DAY);  // Current date
-		boolean includeLower = true;
-		boolean includeUpper = true;
-		
-		Query extensionQuery = new TermQuery(new Term(FILE_EXTENSION, queries[0]));
-		TermRangeQuery dateQuery = TermRangeQuery.newStringRange(LAST_MODIFIED, lowerDate, upperDate, includeLower, includeUpper);
-		
-		BooleanQuery.Builder builder = new BooleanQuery.Builder();
-		builder.add(extensionQuery, Occur.MUST);
-		builder.add(dateQuery, Occur.MUST);
-		BooleanQuery query = builder.build();
-		
-		return searcher.search(query, MAX_HITS);
-	}
-	
-	public TopDocs searchContentsExtensionDate(String searchQuery) throws IOException {
-		
-		String[] queries = searchQuery.split("#");
-		String lowerDate = queries[2];
-		String upperDate = DateTools.dateToString(new Date(), Resolution.DAY);
-		boolean includeLower = true;
-		boolean includeUpper = true;
-		
-		Query contentsQuery = new TermQuery(new Term(CONTENTS, queries[0]));
-		Query extensionQuery = new TermQuery(new Term(FILE_EXTENSION, queries[1]));
-		TermRangeQuery dateQuery = TermRangeQuery.newStringRange(LAST_MODIFIED, lowerDate, upperDate, includeLower, includeUpper);
-		
-		BooleanQuery.Builder builder = new BooleanQuery.Builder();
-		builder.add(contentsQuery, Occur.MUST);
-		builder.add(extensionQuery, Occur.MUST);
-		builder.add(dateQuery, Occur.MUST);
 		BooleanQuery query = builder.build();
 		
 		return searcher.search(query, MAX_HITS);

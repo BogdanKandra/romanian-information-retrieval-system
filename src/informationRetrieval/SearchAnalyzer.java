@@ -15,7 +15,7 @@ import static informationRetrieval.LuceneUtils.*;
 /**
  * Performs the analysis of the user's search query.
  * <p> Takes the user query string, tokenizes it, converts it to lowercase, removes topwords and stems it. </p>
- * @version 2.0
+ * @version 2.5
  * @author Bogdan
  * @see Analyzer
  */

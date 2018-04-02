@@ -8,7 +8,7 @@ import org.apache.tika.Tika;
 
 /**
  * A filter for files of type .txt, .pdf, .doc, .docx and .pptx.
- * @version 2.0
+ * @version 2.5
  * @author Bogdan
  * @see FileFilter
  */
