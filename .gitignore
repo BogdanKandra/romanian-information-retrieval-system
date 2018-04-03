@@ -1,5 +1,6 @@
 .settings
 bin/
+index/
 src/informationRetrieval/Test.java
 phase2.txt
 TODOs.txt
