@@ -2,19 +2,26 @@ package informationRetrieval;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.DateTools;
 import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queries.payloads.AveragePayloadFunction;
+import org.apache.lucene.queries.payloads.PayloadScoreQuery;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
@@ -24,15 +31,18 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.QueryBuilder;
 
 import static informationRetrieval.LuceneUtils.*;
 
 /**
  * The <i>Searcher</i> class.
  * <p> Takes an index directory and a user query string replacing diacritics. <p>
- * @version 2.5
+ * @version 2.7
  * @author Bogdan
  */
 public class Searcher{
@@ -97,12 +107,27 @@ public class Searcher{
 		
 		BooleanQuery.Builder builder = new BooleanQuery.Builder();
 		String[] queries = searchQuery.split("\\|");
+
+		//// Convert the contents field to a tokenstream, analyze it, take the analyzed token and convert it back to String
+		SearchAnalyzer contentsAnalyzer = new SearchAnalyzer(queries[0]);
+		TokenStream stream = contentsAnalyzer.tokenStream(null, new StringReader(queries[0]));
+		CharTermAttribute term = stream.addAttribute(CharTermAttribute.class);
+		stream.reset();
+		stream.incrementToken();
+		String analyzedContents = term.toString();
+		stream.end();
+		stream.close();
 		
 		if(!(queries[0].equals("#"))) {  // The user searches by contents
 			
-			QueryParser contentsQP = new QueryParser(CONTENTS, new SearchAnalyzer(queries[0]));
-			Query contentsQuery = contentsQP.parse(queries[0]);
-			builder.add(contentsQuery, Occur.MUST);
+/*			QueryParser contentsQP = new QueryParser(CONTENTS, new SearchAnalyzer(queries[0]));
+			Query contentsQuery = contentsQP.parse(queries[0]);*/
+			
+			Term t = new Term(CONTENTS, analyzedContents);
+			SpanTermQuery stq = new SpanTermQuery(t);
+			PayloadScoreQuery psq = new PayloadScoreQuery(stq, new AveragePayloadFunction());
+			
+			builder.add(psq, Occur.MUST);
 		}
 		
 		if(!(queries[1].equals("#"))) {  // The user searches by extension
