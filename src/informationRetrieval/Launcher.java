@@ -79,7 +79,7 @@ public class Launcher {
 		long endTime = 0;
 		
 		startTime = System.currentTimeMillis();
-		docs = searcher.search(searcher.getQueryString()); // ???
+		docs = searcher.search(searcher.getQueryString());
 		endTime = System.currentTimeMillis();
 		
 		if(docs.totalHits == 1) {
@@ -100,6 +100,7 @@ public class Launcher {
 				
 				Document doc = searcher.getDocument(scoreDoc);
 				System.out.println("File: " + doc.get(FILE_NAME) + "  (Path: " + doc.get(FILE_PATH) + ")");
+				System.out.println("Score: " + scoreDoc.score);
 			}
 			System.out.println("==================================================\n");
 		}
