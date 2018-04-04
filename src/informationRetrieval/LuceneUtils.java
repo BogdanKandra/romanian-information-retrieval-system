@@ -19,7 +19,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 /**
  * Constants used in the project.
  * <p> <b>TODO:</b> Get the stopword file and max hits as input in graphic interface (getter and setter) </p>
- * @version 2.5
+ * @version 2.7
  * @author Bogdan
  */
 public final class LuceneUtils{
@@ -82,6 +82,7 @@ public final class LuceneUtils{
 		resultFinal = new LowerCaseFilter(tokenizer2);
 		resultFinal = new StopFilter(resultFinal, STOPWORDS);     // Remove stopwords
 		resultFinal = new SnowballFilter(resultFinal, LANGUAGE);  // Perform stemming
+		resultFinal = new PayloadFilter(resultFinal);             // Attaches a payload to each token; should delete if payload is not desired
 		
 		return resultFinal;
 	}
