@@ -61,6 +61,7 @@ public class Searcher{
 		Directory indexDirectory = FSDirectory.open(new File(indexDirPath).toPath());
 		IndexReader indexReader = DirectoryReader.open(indexDirectory);
 		searcher = new IndexSearcher(indexReader);
+		searcher.setSimilarity(new FirstWordsSimilarity());  // Use our custom scoring class - delete if standard scoring is desired
 		
 		String[] components = userQuery.split("\\|");
 		String contents = components[0], extension = components[1], date = components[2];

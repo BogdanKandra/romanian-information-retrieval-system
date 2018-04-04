@@ -58,6 +58,7 @@ public class Indexer{
 		Directory indexDir = FSDirectory.open(Paths.get(indexDirPath));
 		
 		IndexWriterConfig conf = new IndexWriterConfig(); // The default constructor user the StandardAnalyzer as an analyzer
+		conf.setSimilarity(new FirstWordsSimilarity());   // Use our custom scoring class - delete if standard scoring is desired
 		
 		if(openMode.equals("CREATE"))
 			conf.setOpenMode(OpenMode.CREATE);
