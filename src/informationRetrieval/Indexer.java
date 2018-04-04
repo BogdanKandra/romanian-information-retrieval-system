@@ -38,7 +38,7 @@ import static informationRetrieval.LuceneUtils.*; // Static import allows for st
 /**
  * The Indexer class manages an index by using an <i> IndexWriter. </i>
  * <p> <b>TODO:</b> setter for the IndexWriter, as to change the index directory path. </p>
- * @version 2.5
+ * @version 2.7
  * @author Bogdan
  * @see IndexWriter
  */
