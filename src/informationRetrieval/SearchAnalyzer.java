@@ -15,7 +15,7 @@ import static informationRetrieval.LuceneUtils.*;
 /**
  * Performs the analysis of the user's search query.
  * <p> Takes the user query string, tokenizes it, converts it to lowercase, removes topwords and stems it. </p>
- * @version 2.5
+ * @version 2.7
  * @author Bogdan
  * @see Analyzer
  */
@@ -31,14 +31,15 @@ public class SearchAnalyzer extends Analyzer{
 	@Override
 	protected TokenStreamComponents createComponents(String fieldName){
 		
-		Tokenizer tokenizer = new StandardTokenizer();
-		tokenizer.setReader(new StringReader(queryString));
+		Tokenizer source = new StandardTokenizer();
+		source.setReader(new StringReader(queryString));
 		TokenStream tokens = null;
 		
-		tokens = new LowerCaseFilter(tokenizer);
+		tokens = new LowerCaseFilter(source);
 		tokens = new StopFilter(tokens, STOPWORDS);    // Remove stopwords
 		tokens = new SnowballFilter(tokens, LANGUAGE); // Perform stemming
+		tokens = new PayloadFilter(tokens);            // Attaches a payload to each token; should delete if payload is not desired
 		
-		return new TokenStreamComponents(tokenizer, tokens);
+		return new TokenStreamComponents(source, tokens);
 	}
 }
