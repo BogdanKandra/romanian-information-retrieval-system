@@ -24,5 +24,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="F:/Programare/Java/libs/tika-1.14/tika-app-1.14.jar"/>
 	<classpathentry kind="lib" path="F:/Programare/Java/libs/lucene-6.5.1/analysis/common/lucene-analyzers-common-6.5.1.jar"/>
+	<classpathentry kind="lib" path="F:/Programare/Java/libs/lucene-6.5.1/queries/lucene-queries-6.5.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
