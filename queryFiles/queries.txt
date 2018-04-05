@@ -25,3 +25,5 @@ mumps
 28.03.2018
 haina
 străduțele
+stradutele | .txt
+stradutele | 05.04.2018
