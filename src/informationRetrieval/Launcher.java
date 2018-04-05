@@ -22,7 +22,7 @@ import static informationRetrieval.LuceneUtils.*; // Static import allows for st
  * <p> <b>TODO:</b> Make a graphic interface to input the directory paths, choose the files to be indexed 
  * and a query string and display the search results to the user.
  * Maybe, make Indexer and Searcher Singleton classes???
- * @version 2.5
+ * @version 2.7
  * @author Bogdan
  */
 public class Launcher {
