@@ -98,7 +98,7 @@ public class Searcher{
 		if(!(contents.equals("#")))
 			contents = removeDiacritics(contents);
 		
-		queryString = contents + "|" + extension + "|" + date;		
+		queryString = contents + "|" + extension + "|" + date;
 	}
 	
 	// Performs the search and returns the specified number of results
@@ -144,9 +144,11 @@ public class Searcher{
 			boolean includeLower = true;
 			boolean includeUpper = true;
 			
-			TermRangeQuery dateQuery = TermRangeQuery.newStringRange(LAST_MODIFIED, lowerDate, upperDate, includeLower, includeUpper);
+			TermRangeQuery dateQuery = TermRangeQuery.newStringRange(CREATED_AT, lowerDate, upperDate, includeLower, includeUpper);
 			builder.add(dateQuery, Occur.MUST);
 		}
+		
+		System.out.println(searchQuery);
 
 		BooleanQuery query = builder.build();
 		

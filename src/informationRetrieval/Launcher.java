@@ -28,7 +28,7 @@ import static informationRetrieval.LuceneUtils.*; // Static import allows for st
 public class Launcher {
 
 	private static final Logger LOGGER = Logger.getLogger(Launcher.class.getName());
-	private static final String queries = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queries.txt";
+	private static final String queries = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\queryFiles\\queries2.txt";
 	
 	private String indexDir = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\index";
 	private String dataDir  = "F:\\Programare\\Java\\Eclipse\\InformationRetrieval\\data";
